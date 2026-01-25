@@ -8,16 +8,17 @@ from pydantic import BaseModel, Field
 
 class SpotifyCredentials(BaseModel):
     """Spotify API credentials."""
-    client_id: str = Field(..., min_length=1)
-    client_secret: str = Field(..., min_length=1)
+    client_id: str = Field(default="", min_length=0)
+    client_secret: str = Field(default="", min_length=0)
 
 
 class GameStartRequest(BaseModel):
     """Request to start a new game."""
     credentials: SpotifyCredentials
-    mode: Literal["genre", "playlist", "artist"]
-    query: str = Field(..., min_length=1)
+    mode: Literal["genre", "playlist", "artist", "demo"]
+    query: str = Field(default="", min_length=0)
     num_rounds: int = Field(default=10, ge=1, le=50)
+    demo_mode: bool = Field(default=False)
 
 
 class Artist(BaseModel):
@@ -77,8 +78,9 @@ class GameStats(BaseModel):
 class SongSearchRequest(BaseModel):
     """Request to search for songs."""
     credentials: SpotifyCredentials
-    mode: Literal["genre", "playlist", "artist"]
+    mode: Literal["genre", "playlist", "artist", "demo"]
     query: str
+    demo_mode: bool = Field(default=False)
 
 
 class ErrorResponse(BaseModel):

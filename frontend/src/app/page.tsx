@@ -15,13 +15,14 @@ export default function Home() {
     credentials: SpotifyCredentials,
     mode: GameMode,
     query: string,
-    rounds: number
+    rounds: number,
+    demoMode: boolean
   ) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const session = await startGame(credentials, mode, query, rounds);
+      const session = await startGame(credentials, mode, query, rounds, demoMode);
       setGameSession(session);
     } catch (err: any) {
       console.error('Failed to start game:', err);

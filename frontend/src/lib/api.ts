@@ -30,13 +30,15 @@ export async function startGame(
   credentials: SpotifyCredentials,
   mode: GameMode,
   query: string,
-  numRounds: number = 10
+  numRounds: number = 10,
+  demoMode: boolean = false
 ): Promise<GameSession> {
   const response = await api.post<GameSession>('/api/game/start', {
     credentials,
     mode,
     query,
     num_rounds: numRounds,
+    demo_mode: demoMode,
   });
   return response.data;
 }

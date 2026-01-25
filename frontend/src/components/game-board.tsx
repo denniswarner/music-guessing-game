@@ -167,7 +167,8 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
         <AudioPlayer
           previewUrl={currentSong.preview_url || ''}
           duration={10}
-          autoPlay={true}
+          autoPlay={!currentSong.preview_url?.includes('mock')}
+          demoMode={currentSong.preview_url?.includes('mock')}
         />
 
         {/* Hints */}

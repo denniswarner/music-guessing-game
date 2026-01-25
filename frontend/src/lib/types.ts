@@ -48,13 +48,14 @@ export interface GameStats {
   rank: string;
 }
 
-export type GameMode = "genre" | "playlist" | "artist";
+export type GameMode = "genre" | "playlist" | "artist" | "demo";
 
 export interface GameStartRequest {
   credentials: SpotifyCredentials;
   mode: GameMode;
   query: string;
   num_rounds: number;
+  demo_mode?: boolean;
 }
 
 export interface GuessRequest {

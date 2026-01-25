@@ -9,7 +9,7 @@ import { Music } from 'lucide-react';
 import type { SpotifyCredentials, GameMode } from '@/lib/types';
 
 interface GameSetupProps {
-  onStart: (credentials: SpotifyCredentials, mode: GameMode, query: string, rounds: number) => void;
+  onStart: (credentials: SpotifyCredentials, mode: GameMode, query: string, rounds: number, demoMode: boolean) => void;
   isLoading?: boolean;
 }
 
@@ -19,22 +19,24 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
   const [mode, setMode] = useState<GameMode>('genre');
   const [query, setQuery] = useState('');
   const [rounds, setRounds] = useState(10);
+  const [demoMode, setDemoMode] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const credentials: SpotifyCredentials = {
-      client_id: clientId,
-      client_secret: clientSecret,
+      client_id: demoMode ? '' : clientId,
+      client_secret: demoMode ? '' : clientSecret,
     };
     
-    onStart(credentials, mode, query, rounds);
+    onStart(credentials, mode, query, rounds, demoMode);
   };
 
   const modeDescriptions: Record<GameMode, string> = {
-    genre: 'Search by genre or era (e.g., "rock", "90s", "jazz")',
-    playlist: 'Use any public Spotify playlist URL',
-    artist: 'Play songs from a specific artist',
+    genre: demoMode ? 'Try: rock, pop, 80s, 70s, 60s' : 'Search by genre or era (e.g., "rock", "90s", "jazz")',
+    playlist: demoMode ? 'Not available in demo mode' : 'Use any public Spotify playlist URL',
+    artist: demoMode ? 'Try: Beatles, Queen, Michael Jackson, Nirvana' : 'Play songs from a specific artist',
+    demo: 'Demo mode with classic songs',
   };
 
   return (
@@ -54,44 +56,65 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Spotify Credentials */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="clientId">Spotify Client ID</Label>
-                <Input
-                  id="clientId"
-                  type="text"
-                  placeholder="Your Spotify Client ID"
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="clientSecret">Spotify Client Secret</Label>
-                <Input
-                  id="clientSecret"
-                  type="password"
-                  placeholder="Your Spotify Client Secret"
-                  value={clientSecret}
-                  onChange={(e) => setClientSecret(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="text-sm text-muted-foreground">
-                Get your credentials from{' '}
-                <a
-                  href="https://developer.spotify.com/dashboard"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
+            {/* Demo Mode Toggle */}
+            <div className="p-4 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg">🎮 Demo Mode</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Play with 20 classic songs - no Spotify credentials needed!
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant={demoMode ? 'default' : 'outline'}
+                  onClick={() => setDemoMode(!demoMode)}
                 >
-                  Spotify Developer Dashboard
-                </a>
+                  {demoMode ? 'Enabled' : 'Enable'}
+                </Button>
               </div>
             </div>
+
+            {/* Spotify Credentials - Hidden in Demo Mode */}
+            {!demoMode && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="clientId">Spotify Client ID</Label>
+                  <Input
+                    id="clientId"
+                    type="text"
+                    placeholder="Your Spotify Client ID"
+                    value={clientId}
+                    onChange={(e) => setClientId(e.target.value)}
+                    required={!demoMode}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="clientSecret">Spotify Client Secret</Label>
+                  <Input
+                    id="clientSecret"
+                    type="password"
+                    placeholder="Your Spotify Client Secret"
+                    value={clientSecret}
+                    onChange={(e) => setClientSecret(e.target.value)}
+                    required={!demoMode}
+                  />
+                </div>
+
+                <div className="text-sm text-muted-foreground">
+                  Get your credentials from{' '}
+                  <a
+                    href="https://developer.spotify.com/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Spotify Developer Dashboard
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* Game Mode Selection */}
             <div className="space-y-3">
@@ -104,6 +127,7 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
                     variant={mode === m ? 'default' : 'outline'}
                     onClick={() => setMode(m)}
                     className="capitalize"
+                    disabled={demoMode && m === 'playlist'}
                   >
                     {m}
                   </Button>
@@ -117,21 +141,22 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
             {/* Query Input */}
             <div className="space-y-2">
               <Label htmlFor="query">
-                {mode === 'genre' && 'Genre or Era'}
+                {mode === 'genre' && (demoMode ? 'Genre or Era (Optional)' : 'Genre or Era')}
                 {mode === 'playlist' && 'Playlist URL'}
-                {mode === 'artist' && 'Artist Name'}
+                {mode === 'artist' && (demoMode ? 'Artist Name (Optional)' : 'Artist Name')}
               </Label>
               <Input
                 id="query"
                 type="text"
                 placeholder={
-                  mode === 'genre' ? 'e.g., rock, 90s, jazz' :
+                  mode === 'genre' ? (demoMode ? 'e.g., rock, pop, 80s (or leave blank for all)' : 'e.g., rock, 90s, jazz') :
                   mode === 'playlist' ? 'https://open.spotify.com/playlist/...' :
-                  'e.g., The Beatles, Taylor Swift'
+                  demoMode ? 'e.g., Beatles, Queen (or leave blank for all)' : 'e.g., The Beatles, Taylor Swift'
                 }
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                required
+                required={!demoMode}
+                disabled={demoMode && mode === 'playlist'}
               />
             </div>
 

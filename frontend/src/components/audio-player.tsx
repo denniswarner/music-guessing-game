@@ -4,20 +4,22 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music } from 'lucide-react';
 
 interface AudioPlayerProps {
   previewUrl: string;
   duration?: number;
   autoPlay?: boolean;
   onEnded?: () => void;
+  demoMode?: boolean;
 }
 
 export function AudioPlayer({ 
   previewUrl, 
   duration = 10,
   autoPlay = false,
-  onEnded 
+  onEnded,
+  demoMode = false
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -92,10 +94,21 @@ export function AudioPlayer({
   };
 
   const progressPercentage = (currentTime / duration) * 100;
+  const isDemoUrl = previewUrl?.includes('mock');
 
   return (
     <Card className="p-6">
-      <audio ref={audioRef} src={previewUrl} preload="auto" />
+      {demoMode && isDemoUrl && (
+        <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg text-sm">
+          <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+            🎵 Demo Mode
+          </p>
+          <p className="text-yellow-700 dark:text-yellow-300">
+            Audio playback not available in demo mode. Use your music knowledge to guess the song!
+          </p>
+        </div>
+      )}
+      <audio ref={audioRef} src={!isDemoUrl ? previewUrl : undefined} preload="auto" />
       
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -118,9 +131,14 @@ export function AudioPlayer({
           onClick={togglePlay}
           className="w-full"
           size="lg"
-          disabled={!previewUrl}
+          disabled={!previewUrl || isDemoUrl}
         >
-          {isPlaying ? (
+          {isDemoUrl ? (
+            <>
+              <Music className="mr-2 h-5 w-5" />
+              Audio Not Available (Demo Mode)
+            </>
+          ) : isPlaying ? (
             <>
               <Pause className="mr-2 h-5 w-5" />
               Pause

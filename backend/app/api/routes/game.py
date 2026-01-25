@@ -18,6 +18,7 @@ from app.models import (
     GameStats, Track, ErrorResponse
 )
 from app.game_manager import session_manager
+from app.mock_data import filter_mock_songs
 
 router = APIRouter()
 
@@ -37,41 +38,62 @@ async def start_game(request: GameStartRequest):
         HTTPException: If game creation fails
     """
     try:
-        # Initialize Spotify client
-        spotify_client = SpotifyClient(
-            request.credentials.client_id,
-            request.credentials.client_secret
-        )
-        
-        # Get songs based on mode
-        if request.mode == "genre":
-            songs = spotify_client.get_songs_by_genre(request.query, limit=50)
-        elif request.mode == "playlist":
-            songs = spotify_client.get_songs_from_playlist(request.query)
-        elif request.mode == "artist":
-            songs = spotify_client.get_top_tracks(request.query)
-        else:
-            raise HTTPException(status_code=400, detail="Invalid game mode")
-        
-        if not songs:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No songs with preview URLs found for '{request.query}'"
+        # Check if demo mode
+        if request.demo_mode or request.mode == "demo":
+            # Use mock data
+            songs = filter_mock_songs(request.query)
+            if not songs:
+                songs = filter_mock_songs()  # Get all if no match
+            
+            # Shuffle songs
+            random.shuffle(songs)
+            
+            # Adjust rounds if fewer songs available
+            num_rounds = min(request.num_rounds, len(songs))
+            
+            # Create session with demo credentials
+            session_id = session_manager.create_session(
+                client_id="demo",
+                client_secret="demo",
+                songs=songs,
+                total_rounds=num_rounds
             )
+        else:
+            # Initialize Spotify client
+            spotify_client = SpotifyClient(
+                request.credentials.client_id,
+                request.credentials.client_secret
+            )
+            
+            # Get songs based on mode
+            if request.mode == "genre":
+                songs = spotify_client.get_songs_by_genre(request.query, limit=50)
+            elif request.mode == "playlist":
+                songs = spotify_client.get_songs_from_playlist(request.query)
+            elif request.mode == "artist":
+                songs = spotify_client.get_top_tracks(request.query)
+            else:
+                raise HTTPException(status_code=400, detail="Invalid game mode")
         
-        # Shuffle songs
-        random.shuffle(songs)
-        
-        # Adjust rounds if fewer songs available
-        num_rounds = min(request.num_rounds, len(songs))
-        
-        # Create session
-        session_id = session_manager.create_session(
-            client_id=request.credentials.client_id,
-            client_secret=request.credentials.client_secret,
-            songs=songs,
-            total_rounds=num_rounds
-        )
+            if not songs:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No songs with preview URLs found for '{request.query}'"
+                )
+            
+            # Shuffle songs
+            random.shuffle(songs)
+            
+            # Adjust rounds if fewer songs available
+            num_rounds = min(request.num_rounds, len(songs))
+            
+            # Create session
+            session_id = session_manager.create_session(
+                client_id=request.credentials.client_id,
+                client_secret=request.credentials.client_secret,
+                songs=songs,
+                total_rounds=num_rounds
+            )
         
         # Convert songs to Track models
         tracks = [
