@@ -16,13 +16,26 @@ Complete guide to running the Music Guessing Game with the modern web frontend.
 
 ---
 
+## 🎮 Demo Mode Available!
+
+**NEW:** You can now play without Spotify credentials using Demo Mode!
+- 20 classic songs built-in
+- Full web UI experience
+- No API setup required
+- Perfect while Spotify has paused new app creation
+
+👉 **See [DEMO_MODE.md](DEMO_MODE.md) for complete demo mode guide**
+
+---
+
 ## 📋 Prerequisites
 
 Before starting, make sure you have:
 
 - **Python 3.8+** installed
 - **Node.js 18+** and npm installed
-- **Spotify API credentials** (from [Spotify Developer Dashboard](https://developer.spotify.com/dashboard))
+- **Spotify API credentials** (OPTIONAL - use Demo Mode without credentials!)
+  - Get from [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) when available
 
 Check versions:
 ```bash
@@ -81,7 +94,23 @@ The frontend will start at `http://localhost:3000`
 
 ### Step 5: Open in Browser
 
-Navigate to **http://localhost:3000** and start playing! 🎮
+Navigate to **http://localhost:3000**
+
+### Step 6: Choose Your Mode
+
+**Option A: Demo Mode** (No Credentials Needed)
+1. Click **"Enable"** on the Demo Mode toggle
+2. Skip the credentials
+3. Choose genre or artist
+4. Start playing immediately!
+
+**Option B: Real Spotify Mode**
+1. Enter your Spotify Client ID and Secret
+2. Choose your game mode
+3. Enter your search query
+4. Start playing!
+
+🎮 **See [DEMO_MODE.md](DEMO_MODE.md) for complete demo mode guide**
 
 ---
 
