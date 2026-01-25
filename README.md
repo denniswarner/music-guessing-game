@@ -8,7 +8,26 @@ A fun music guessing game for you and your friends using Spotify's official API 
 - **Spotify Account** (free account works!)
 - **ffmpeg** (optional, for 10-second clips)
 
-## 🚀 Quick Setup
+## 🌐 **NEW: Web Version Available!**
+
+You can now play in your browser with a beautiful modern UI! 
+
+**Quick Start:**
+```bash
+# Terminal 1: Start backend
+./start-backend.sh
+
+# Terminal 2: Start frontend
+./start-frontend.sh
+```
+
+Then open **http://localhost:3000** in your browser.
+
+👉 **See [WEB_SETUP.md](WEB_SETUP.md) for complete web version setup guide**
+
+---
+
+## 🚀 Quick Setup (CLI Version)
 
 ### 1. Get Spotify API Credentials (Free!)
 
@@ -122,16 +141,27 @@ Just copy any Spotify playlist link like:
 
 ## ⚙️ Features
 
+### Core Features
 - ✅ Uses official Spotify API (100% legal!)
 - ✅ 10-second preview clips (perfect challenge length!)
 - ✅ Hints system (album, year, artist)
 - ✅ Score tracking
 - ✅ Multiple game modes
 - ✅ No music download required
-- ✅ Plays audio directly in terminal (with optional browser fallback)
 - ✅ Modular architecture for easy testing and maintenance
 - ✅ Comprehensive test suite with pytest
 - ✅ Environment variable support (.env files)
+
+### Web Version Features ✨
+- ✅ Beautiful modern UI with Next.js + React
+- ✅ TypeScript for type safety
+- ✅ Tailwind CSS + Shadcn/ui components
+- ✅ Smooth animations with Framer Motion
+- ✅ Real-time audio player with controls
+- ✅ Responsive design (mobile + desktop)
+- ✅ Dark mode support
+- ✅ FastAPI backend with REST API
+- ✅ Interactive API documentation
 
 ## 🏗️ Project Structure
 
