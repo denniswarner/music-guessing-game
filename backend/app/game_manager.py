@@ -67,8 +67,8 @@ class GameSessionManager:
         Create a new game session.
         
         Args:
-            client_id: Spotify API client ID (or "demo" for demo mode)
-            client_secret: Spotify API client secret (or "demo" for demo mode)
+            client_id: Provider name, Spotify client ID, "demo", or "custom" for custom mode
+            client_secret: Spotify API client secret (empty for Deezer/demo/custom)
             songs: List of songs for the game
             total_rounds: Number of rounds to play
             
@@ -78,10 +78,11 @@ class GameSessionManager:
         session_id = str(uuid.uuid4())
         
         # Initialize components
-        # For demo mode, create a dummy client (won't be used)
-        if client_id == "demo":
+        # For demo mode, custom mode, or non-Spotify providers, don't create a client
+        if client_id in ("demo", "deezer", "custom"):
             spotify_client = None
         else:
+            # Assume it's Spotify if client_secret is provided
             spotify_client = SpotifyClient(client_id, client_secret)
             
         game_engine = GameEngine()

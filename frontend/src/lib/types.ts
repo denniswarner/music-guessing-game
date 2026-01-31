@@ -2,10 +2,15 @@
  * TypeScript type definitions for the Music Guessing Game
  */
 
-export interface SpotifyCredentials {
+export type MusicProvider = "spotify" | "deezer" | "demo" | "custom";
+
+export interface MusicProviderCredentials {
   client_id: string;
   client_secret: string;
 }
+
+// Keep for backwards compatibility
+export type SpotifyCredentials = MusicProviderCredentials;
 
 export interface Artist {
   name: string;
@@ -48,14 +53,17 @@ export interface GameStats {
   rank: string;
 }
 
-export type GameMode = "genre" | "playlist" | "artist" | "demo";
+export type GameMode = "genre" | "playlist" | "artist" | "demo" | "custom";
 
 export interface GameStartRequest {
-  credentials: SpotifyCredentials;
+  provider: MusicProvider;
+  credentials: MusicProviderCredentials;
   mode: GameMode;
   query: string;
   num_rounds: number;
   demo_mode?: boolean;
+  custom_list_id?: string;
+  custom_filters?: Record<string, string>;
 }
 
 export interface GuessRequest {

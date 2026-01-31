@@ -1,0 +1,71 @@
+{
+  "id": "a8ca7ed1-1ec9-49bd-90a2-6c941cd6f277",
+  "name": "Hip Hop Classics",
+  "description": "A test list with classic 80s hits",
+  "target_audience": "Test Event",
+  "primary_decade": "1980s",
+  "primary_genre": "Rock",
+  "songs": [
+    {
+      "id": "2112363",
+      "name": "Mathematics",
+      "artist": "Mos Def",
+      "album": "Black On Both Sides",
+      "preview_url": "https://cdnt-preview.dzcdn.net/api/1/1/8/0/9/0/809c784b2e1a4f697302c97da426594c.mp3?hdnea=exp=1769884080~acl=/api/1/1/8/0/9/0/809c784b2e1a4f697302c97da426594c.mp3*~data=user_id=0,application_id=42~hmac=503ba7f4a4e3969d832812c67ac2d29d430db4ce4a891457a240e86a22ba4339",
+      "decade": null,
+      "genre": "Hip Hop",
+      "style": null,
+      "mood": null,
+      "difficulty": "medium",
+      "provider": "deezer",
+      "notes": null
+    },
+    {
+      "id": "3073020171",
+      "name": "Concrete Schoolyard",
+      "artist": "Jurassic 5",
+      "album": "J5 (Deluxe Edition)",
+      "preview_url": "https://cdnt-preview.dzcdn.net/api/1/1/3/5/8/0/358f23dc4cc104f7a7fe95115bc0e00f.mp3?hdnea=exp=1769884448~acl=/api/1/1/3/5/8/0/358f23dc4cc104f7a7fe95115bc0e00f.mp3*~data=user_id=0,application_id=42~hmac=26d8e92ffe1f1cb63c0e9a4d4916cfb3cefe228ebbb7ad97282994b03c26c1ea",
+      "decade": null,
+      "genre": "Hip Hop",
+      "style": null,
+      "mood": null,
+      "difficulty": "medium",
+      "provider": "deezer",
+      "notes": null
+    },
+    {
+      "id": "12531954",
+      "name": "San Francisco Knights",
+      "artist": "People Under the Stairs",
+      "album": "The Next Step",
+      "preview_url": "https://cdnt-preview.dzcdn.net/api/1/1/6/6/8/0/668a2364aa428e7f3203e1200291f7ba.mp3?hdnea=exp=1769884470~acl=/api/1/1/6/6/8/0/668a2364aa428e7f3203e1200291f7ba.mp3*~data=user_id=0,application_id=42~hmac=b51376b6d67679cdea349194af198b00f5da857be3de33e45b994f6b06a320a6",
+      "decade": null,
+      "genre": "Hip Hop",
+      "style": null,
+      "mood": null,
+      "difficulty": "medium",
+      "provider": "deezer",
+      "notes": null
+    },
+    {
+      "id": "2176508",
+      "name": "Be (Intro)",
+      "artist": "Common",
+      "album": "Be",
+      "preview_url": "https://cdnt-preview.dzcdn.net/api/1/1/7/a/2/0/7a2e5faf675eaee50c759ca4df0fafc8.mp3?hdnea=exp=1769884488~acl=/api/1/1/7/a/2/0/7a2e5faf675eaee50c759ca4df0fafc8.mp3*~data=user_id=0,application_id=42~hmac=e608442b0c951b1fa16c7f1493a6b9a9e2499e2b25c0f2577f2d4b307afafcc4",
+      "decade": null,
+      "genre": "Hip Hop",
+      "style": null,
+      "mood": null,
+      "difficulty": "medium",
+      "provider": "deezer",
+      "notes": null
+    }
+  ],
+  "created_at": "2026-01-31T13:47:32.649899",
+  "updated_at": "2026-01-31T18:20:33.959431",
+  "created_by": "admin",
+  "is_active": true,
+  "times_played": 2
+}

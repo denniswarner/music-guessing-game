@@ -10,7 +10,8 @@ import type {
   GuessResponse,
   GameStats,
   Track,
-  SpotifyCredentials,
+  MusicProviderCredentials,
+  MusicProvider,
   GameMode
 } from './types';
 
@@ -24,21 +25,25 @@ const api = axios.create({
 });
 
 /**
- * Start a new game session
+ * Start a new game session with the selected music provider
  */
 export async function startGame(
-  credentials: SpotifyCredentials,
+  provider: MusicProvider,
+  credentials: MusicProviderCredentials,
   mode: GameMode,
   query: string,
   numRounds: number = 10,
-  demoMode: boolean = false
+  demoMode: boolean = false,
+  customListId?: string
 ): Promise<GameSession> {
   const response = await api.post<GameSession>('/api/game/start', {
+    provider: customListId ? 'custom' : provider,
     credentials,
-    mode,
+    mode: customListId ? 'custom' : mode,
     query,
     num_rounds: numRounds,
     demo_mode: demoMode,
+    custom_list_id: customListId,
   });
   return response.data;
 }
@@ -83,14 +88,16 @@ export async function endGame(sessionId: string): Promise<void> {
 }
 
 /**
- * Search for songs
+ * Search for songs with the selected provider
  */
 export async function searchSongs(
-  credentials: SpotifyCredentials,
+  provider: MusicProvider,
+  credentials: MusicProviderCredentials,
   mode: GameMode,
   query: string
 ): Promise<Track[]> {
   const response = await api.post<Track[]>('/api/songs/search', {
+    provider,
     credentials,
     mode,
     query,

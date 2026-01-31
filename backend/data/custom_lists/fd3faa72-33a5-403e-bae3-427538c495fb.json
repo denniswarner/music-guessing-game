@@ -1,0 +1,29 @@
+{
+  "id": "fd3faa72-33a5-403e-bae3-427538c495fb",
+  "name": "Our 80's",
+  "description": null,
+  "target_audience": "Family",
+  "primary_decade": "1980s",
+  "primary_genre": "Alternative",
+  "songs": [
+    {
+      "id": "2522674011",
+      "name": "Can't Get Used to Losing You (2012 Remaster)",
+      "artist": "The English Beat",
+      "album": "I Just Can\u2019t Stop It (2012 Remaster)",
+      "preview_url": "https://cdnt-preview.dzcdn.net/api/1/1/7/c/1/0/7c1eb5ff73f3a27cc7081d316fdb0a7a.mp3?hdnea=exp=1769883050~acl=/api/1/1/7/c/1/0/7c1eb5ff73f3a27cc7081d316fdb0a7a.mp3*~data=user_id=0,application_id=42~hmac=923549b677446646539943a3b248f10818cd5be75abbfe60e8d7ae75ac76547c",
+      "decade": "1980s",
+      "genre": "Pop",
+      "style": "Alternative",
+      "mood": "Upbeat",
+      "difficulty": "medium",
+      "provider": "deezer",
+      "notes": null
+    }
+  ],
+  "created_at": "2026-01-31T17:51:08.651270",
+  "updated_at": "2026-01-31T17:56:07.806852",
+  "created_by": "admin",
+  "is_active": true,
+  "times_played": 0
+}

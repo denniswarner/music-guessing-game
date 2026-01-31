@@ -8,9 +8,10 @@ searching, and retrieving track information.
 from typing import List, Dict, Any, Optional
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from src.base_music_client import BaseMusicClient
 
 
-class SpotifyClient:
+class SpotifyClient(BaseMusicClient):
     """
     Client for interacting with Spotify's API.
     
@@ -140,3 +141,27 @@ class SpotifyClient:
             bool: True if preview URL exists and is not None
         """
         return track.get('preview_url') is not None
+    
+    @staticmethod
+    def normalize_track_format(track: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Normalize Spotify track data to common format.
+        
+        Spotify already uses our standard format, so this mostly passes through
+        with minor cleanup and adds a provider tag.
+        
+        Args:
+            track (Dict[str, Any]): Spotify track object
+            
+        Returns:
+            Dict[str, Any]: Normalized track object
+        """
+        # Spotify format is already our standard, just ensure consistency
+        return {
+            'id': track.get('id', 'unknown'),
+            'name': track.get('name', 'Unknown Title'),
+            'artists': track.get('artists', [{'name': 'Unknown Artist'}]),
+            'album': track.get('album', {'name': 'Unknown Album', 'release_date': 'Unknown'}),
+            'preview_url': track.get('preview_url'),
+            'provider': 'spotify'  # Tag to identify the source
+        }

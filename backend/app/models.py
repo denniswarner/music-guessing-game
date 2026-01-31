@@ -6,19 +6,28 @@ from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
 
-class SpotifyCredentials(BaseModel):
-    """Spotify API credentials."""
+class MusicProviderCredentials(BaseModel):
+    """Music provider API credentials (if needed)."""
     client_id: str = Field(default="", min_length=0)
     client_secret: str = Field(default="", min_length=0)
 
 
+# Keep for backwards compatibility
+SpotifyCredentials = MusicProviderCredentials
+
+
 class GameStartRequest(BaseModel):
     """Request to start a new game."""
-    credentials: SpotifyCredentials
-    mode: Literal["genre", "playlist", "artist", "demo"]
+    provider: Literal["spotify", "deezer", "demo", "custom"] = Field(default="demo")
+    credentials: MusicProviderCredentials = Field(default_factory=MusicProviderCredentials)
+    mode: Literal["genre", "playlist", "artist", "demo", "custom"]
     query: str = Field(default="", min_length=0)
     num_rounds: int = Field(default=10, ge=1, le=50)
     demo_mode: bool = Field(default=False)
+    
+    # For custom mode
+    custom_list_id: Optional[str] = Field(default=None, description="ID of custom song list")
+    custom_filters: Optional[dict] = Field(default=None, description="Filters for custom list (decade, genre, style, mood, difficulty)")
 
 
 class Artist(BaseModel):
@@ -77,8 +86,9 @@ class GameStats(BaseModel):
 
 class SongSearchRequest(BaseModel):
     """Request to search for songs."""
-    credentials: SpotifyCredentials
-    mode: Literal["genre", "playlist", "artist", "demo"]
+    provider: Literal["spotify", "deezer", "demo", "custom"] = Field(default="demo")
+    credentials: MusicProviderCredentials = Field(default_factory=MusicProviderCredentials)
+    mode: Literal["genre", "playlist", "artist", "demo", "custom"]
     query: str
     demo_mode: bool = Field(default=False)
 

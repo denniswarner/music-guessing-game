@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { GameSetup } from '@/components/game-setup';
 import { GameBoard } from '@/components/game-board';
 import { startGame } from '@/lib/api';
-import type { SpotifyCredentials, GameMode, GameSession } from '@/lib/types';
+import type { MusicProviderCredentials, MusicProvider, GameMode, GameSession } from '@/lib/types';
 
 export default function Home() {
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
@@ -12,17 +12,19 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const handleStartGame = async (
-    credentials: SpotifyCredentials,
+    provider: MusicProvider,
+    credentials: MusicProviderCredentials,
     mode: GameMode,
     query: string,
     rounds: number,
-    demoMode: boolean
+    demoMode: boolean,
+    customListId?: string
   ) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const session = await startGame(credentials, mode, query, rounds, demoMode);
+      const session = await startGame(provider, credentials, mode, query, rounds, demoMode, customListId);
       setGameSession(session);
     } catch (err: any) {
       console.error('Failed to start game:', err);

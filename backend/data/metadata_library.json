@@ -1,0 +1,144 @@
+{
+  "version": "1.0",
+  "created": "2026-01-31T11:46:19.731179",
+  "songs": {
+    "deezer_1787604667": {
+      "id": "1787604667",
+      "provider": "deezer",
+      "name": "The Tears of a Clown",
+      "artist": "The English Beat",
+      "album": "The Tears of a Clown",
+      "release_date": "Unknown",
+      "metadata": {
+        "decade": "1980s",
+        "genre": "Pop",
+        "style": "Alternative",
+        "mood": "Upbeat",
+        "difficulty": "medium",
+        "notes": null
+      },
+      "added_date": "2026-01-31T12:37:26.549688",
+      "last_updated": "2026-01-31T12:37:26.549701",
+      "times_used": 1
+    },
+    "deezer_2522689971": {
+      "id": "2522689971",
+      "provider": "deezer",
+      "name": "Too Nice to Talk to (2012 Remaster)",
+      "artist": "The English Beat",
+      "album": "Wha’ppen? (Expanded) (2012 Remaster)",
+      "release_date": "Unknown",
+      "metadata": {
+        "decade": "1980s",
+        "genre": "Pop",
+        "style": "Alternative",
+        "mood": "Upbeat",
+        "difficulty": "medium",
+        "notes": null
+      },
+      "added_date": "2026-01-31T12:55:20.216236",
+      "last_updated": "2026-01-31T12:55:20.216247",
+      "times_used": 1
+    },
+    "deezer_2522674011": {
+      "id": "2522674011",
+      "provider": "deezer",
+      "name": "Can't Get Used to Losing You (2012 Remaster)",
+      "artist": "The English Beat",
+      "album": "I Just Can’t Stop It (2012 Remaster)",
+      "release_date": "Unknown",
+      "metadata": {
+        "decade": "1980s",
+        "genre": "Pop",
+        "style": "Alternative",
+        "mood": "Upbeat",
+        "difficulty": "medium",
+        "notes": null
+      },
+      "added_date": "2026-01-31T12:56:05.123790",
+      "last_updated": "2026-01-31T12:56:05.123805",
+      "times_used": 1
+    },
+    "deezer_2112363": {
+      "id": "2112363",
+      "provider": "deezer",
+      "name": "Mathematics",
+      "artist": "Mos Def",
+      "album": "Black On Both Sides",
+      "release_date": "Unknown",
+      "metadata": {
+        "decade": null,
+        "genre": "Hip Hop",
+        "style": null,
+        "mood": null,
+        "difficulty": "medium",
+        "notes": null
+      },
+      "added_date": "2026-01-31T13:13:15.045386",
+      "last_updated": "2026-01-31T13:13:15.045399",
+      "times_used": 1
+    },
+    "deezer_3073020171": {
+      "id": "3073020171",
+      "provider": "deezer",
+      "name": "Concrete Schoolyard",
+      "artist": "Jurassic 5",
+      "album": "J5 (Deluxe Edition)",
+      "release_date": "Unknown",
+      "metadata": {
+        "decade": null,
+        "genre": "Hip Hop",
+        "style": null,
+        "mood": null,
+        "difficulty": "medium",
+        "notes": null
+      },
+      "added_date": "2026-01-31T13:19:18.574137",
+      "last_updated": "2026-01-31T13:19:18.574150",
+      "times_used": 1
+    },
+    "deezer_12531954": {
+      "id": "12531954",
+      "provider": "deezer",
+      "name": "San Francisco Knights",
+      "artist": "People Under the Stairs",
+      "album": "The Next Step",
+      "release_date": "Unknown",
+      "metadata": {
+        "decade": null,
+        "genre": "Hip Hop",
+        "style": null,
+        "mood": null,
+        "difficulty": "medium",
+        "notes": null
+      },
+      "added_date": "2026-01-31T13:19:39.629995",
+      "last_updated": "2026-01-31T13:19:39.630007",
+      "times_used": 1
+    },
+    "deezer_2176508": {
+      "id": "2176508",
+      "provider": "deezer",
+      "name": "Be (Intro)",
+      "artist": "Common",
+      "album": "Be",
+      "release_date": "Unknown",
+      "metadata": {
+        "decade": null,
+        "genre": "Hip Hop",
+        "style": null,
+        "mood": null,
+        "difficulty": "medium",
+        "notes": null
+      },
+      "added_date": "2026-01-31T13:20:17.042709",
+      "last_updated": "2026-01-31T13:20:17.042724",
+      "times_used": 1
+    }
+  },
+  "statistics": {
+    "total_songs": 7,
+    "total_artists": 5,
+    "last_updated": "2026-01-31T13:20:17.042785"
+  }
+}

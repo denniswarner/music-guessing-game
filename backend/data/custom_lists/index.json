@@ -1,0 +1,30 @@
+{
+  "lists": [
+    {
+      "id": "fd3faa72-33a5-403e-bae3-427538c495fb",
+      "name": "Our 80's",
+      "description": null,
+      "target_audience": "Family",
+      "primary_decade": "1980s",
+      "primary_genre": "Alternative",
+      "song_count": 1,
+      "created_at": "2026-01-31T17:51:08.651270",
+      "updated_at": "2026-01-31T17:56:07.806852",
+      "times_played": 0,
+      "is_active": true
+    },
+    {
+      "id": "a8ca7ed1-1ec9-49bd-90a2-6c941cd6f277",
+      "name": "Hip Hop Classics",
+      "description": "A test list with classic 80s hits",
+      "target_audience": "Test Event",
+      "primary_decade": "1980s",
+      "primary_genre": "Rock",
+      "song_count": 4,
+      "created_at": "2026-01-31T13:47:32.649899",
+      "updated_at": "2026-01-31T18:20:33.959431",
+      "times_played": 2,
+      "is_active": true
+    }
+  ]
+}

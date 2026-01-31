@@ -1,29 +1,56 @@
-# 🎵 Spotify Music Guessing Game
+# 🎵 Music Guessing Game
 
-A fun music guessing game for you and your friends using Spotify's official API with **10-second preview clips**!
+A fun music guessing game with **multiple music providers**, **admin features**, and a **modern web interface**!
+
+## 🎶 **NEW: Admin Custom Lists!** ⭐
+
+Create curated song lists for any audience:
+- Categorize by decade, genre, style, mood
+- Filter songs for specific themes
+- Perfect for events and parties!
+
+👉 **See [ADMIN_GUIDE.md](ADMIN_GUIDE.md) for admin features documentation**
+
+## 🎯 Music Sources
+
+Choose from four music sources:
+
+- **🎶 Deezer** - No credentials needed, 30-second previews ⭐ **RECOMMENDED**
+- **🎵 Spotify** - Requires API credentials, 10-second previews  
+- **🎨 Custom Lists** - Admin-curated, fully categorized songs ⭐ **NEW!**
+- **🎮 Demo Mode** - 20 classic songs, perfect for testing
+
+👉 **See [MULTI_PROVIDER_GUIDE.md](MULTI_PROVIDER_GUIDE.md) for provider comparison**
 
 ## 📋 Requirements
 
-- **Python 3.8+** (3.8, 3.9, 3.10, 3.11, or 3.12)
-- **Spotify Account** (free account works!)
-- **ffmpeg** (optional, for 10-second clips)
+- **Python 3.8+** (3.8, 3.9, 3.10, 3.11, 3.12, or 3.13)
+- **Node.js 18+** (for web interface)
+- **Internet connection** (except for Demo mode)
 
-## 🌐 **NEW: Web Version Available!**
+## 🌐 Web Version (Recommended!)
 
-You can now play in your browser with a beautiful modern UI! 
+Play in your browser with a beautiful modern UI!
 
-**Quick Start:**
+### 🚀 Quick Start (Easiest - Use Deezer)
+
 ```bash
 # Terminal 1: Start backend
 ./start-backend.sh
 
-# Terminal 2: Start frontend
+# Terminal 2: Start frontend  
 ./start-frontend.sh
 ```
 
-Then open **http://localhost:3000** in your browser.
+Then open **http://localhost:3000** and select **"Deezer"** - no credentials needed!
 
-👉 **See [WEB_SETUP.md](WEB_SETUP.md) for complete web version setup guide**
+### Alternative Options
+
+- **Demo Mode**: Select "Demo" in the UI - works offline with 20 classic songs
+- **Spotify**: Select "Spotify" and enter your API credentials
+
+👉 **See [WEB_SETUP.md](WEB_SETUP.md) for detailed web setup guide**  
+👉 **See [MULTI_PROVIDER_GUIDE.md](MULTI_PROVIDER_GUIDE.md) for provider details**
 
 ---
 
