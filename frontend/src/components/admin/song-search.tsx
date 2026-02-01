@@ -32,12 +32,11 @@ interface SongSearchProps {
 }
 
 export function SongSearch({ listId, categories, onClose, onSongAdded }: SongSearchProps) {
-  const [provider, setProvider] = useState<'deezer' | 'demo'>('deezer');
-  const [mode, setMode] = useState<'genre' | 'artist'>('genre');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSong, setSelectedSong] = useState<any | null>(null);
+  const provider = 'deezer'; // Always use Deezer
   
   // Categorization form
   const [decade, setDecade] = useState('');
@@ -52,7 +51,7 @@ export function SongSearch({ listId, categories, onClose, onSongAdded }: SongSea
 
   const handleSearch = async () => {
     if (!query.trim()) {
-      alert('Please enter a search query');
+      toast.error('Please enter a search term');
       return;
     }
 
@@ -60,13 +59,17 @@ export function SongSearch({ listId, categories, onClose, onSongAdded }: SongSea
       setIsSearching(true);
       const data = await searchSongs({
         provider,
-        mode,
+        mode: 'genre', // Use general search which handles artist, song title, genre, etc.
         query: query.trim()
       });
       setResults(data);
+      
+      if (data.length === 0) {
+        toast.info('No songs found. Try a different search term.');
+      }
     } catch (err: any) {
       console.error('Search failed:', err);
-      alert('Search failed. Please try again.');
+      toast.error('Search failed. Please try again.');
     } finally {
       setIsSearching(false);
     }
@@ -233,46 +236,23 @@ export function SongSearch({ listId, categories, onClose, onSongAdded }: SongSea
           {/* Search Form */}
           {!selectedSong && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Provider</Label>
-                  <Select value={provider} onValueChange={(v: any) => setProvider(v)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="deezer">Deezer (Recommended)</SelectItem>
-                      <SelectItem value="demo">Demo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Mode</Label>
-                  <Select value={mode} onValueChange={(v: any) => setMode(v)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="genre">Genre</SelectItem>
-                      <SelectItem value="artist">Artist</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
               <div className="flex gap-2">
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={mode === 'genre' ? 'e.g., rock, pop, 80s' : 'e.g., Queen, Beatles'}
+                  placeholder="Search by artist, song title, or genre..."
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  className="flex-1"
                 />
                 <Button onClick={handleSearch} disabled={isSearching} className="gap-2">
                   <Search className="h-4 w-4" />
                   {isSearching ? 'Searching...' : 'Search'}
                 </Button>
               </div>
+              
+              <p className="text-xs text-muted-foreground">
+                Try: "Queen", "Bohemian Rhapsody", "80s rock", "jazz", etc.
+              </p>
 
               {/* Search Results */}
               {results.length > 0 && (

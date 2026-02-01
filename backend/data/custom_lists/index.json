@@ -22,9 +22,11 @@
       "primary_genre": "Rock",
       "song_count": 4,
       "created_at": "2026-01-31T13:47:32.649899",
-      "updated_at": "2026-01-31T18:20:33.959431",
-      "times_played": 2,
-      "is_active": true
+      "updated_at": "2026-02-01T12:34:00.987887",
+      "times_played": 12,
+      "is_active": true,
+      "status": "approved",
+      "submitted_by": null
     }
   ]
 }

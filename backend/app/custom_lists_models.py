@@ -51,6 +51,10 @@ class CustomSongList(BaseModel):
     created_by: Optional[str] = Field(default="admin", description="Creator username")
     is_active: bool = Field(default=True, description="Whether this list is available for games")
     
+    # Submission info (for guest contributions)
+    status: str = Field(default="approved", description="Status: pending, approved, rejected")
+    submitted_by: Optional[str] = Field(default=None, description="Name/email of guest contributor")
+    
     # Usage stats
     times_played: int = Field(default=0, description="How many times this list has been used")
 
@@ -101,3 +105,13 @@ class CustomListSummary(BaseModel):
     updated_at: str
     times_played: int
     is_active: bool
+    status: str = "approved"
+    submitted_by: Optional[str] = None
+
+
+class GuestSubmissionRequest(BaseModel):
+    """Request for guest playlist submission."""
+    name: str = Field(description="Playlist name")
+    description: Optional[str] = Field(default=None, description="Playlist description")
+    submitted_by: str = Field(description="Name or email of contributor")
+    songs: List[CustomSong] = Field(description="Songs in the playlist")

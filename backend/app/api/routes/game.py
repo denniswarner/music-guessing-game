@@ -22,8 +22,31 @@ from app.models import (
 from app.game_manager import session_manager
 from app.mock_data import filter_mock_songs
 from app.custom_list_manager import custom_list_manager
+import requests
 
 router = APIRouter()
+
+
+def refresh_deezer_preview_url(track_id: str) -> str | None:
+    """
+    Fetch a fresh preview URL from Deezer for a given track ID.
+    
+    Deezer preview URLs expire, so we need to fetch fresh ones when playing.
+    
+    Args:
+        track_id: Deezer track ID
+        
+    Returns:
+        Fresh preview URL or None if not available
+    """
+    try:
+        response = requests.get(f"https://api.deezer.com/track/{track_id}")
+        if response.ok:
+            data = response.json()
+            return data.get('preview')
+    except Exception as e:
+        print(f"Failed to refresh Deezer preview URL for track {track_id}: {e}")
+    return None
 
 
 def get_music_client(provider: str, credentials: dict):
@@ -102,18 +125,27 @@ async def start_game(request: GameStartRequest):
                 )
             
             # Convert CustomSong to dict format expected by game
-            songs = [
-                {
+            # Refresh Deezer preview URLs as they expire
+            converted_songs = []
+            for song in songs:
+                preview_url = song.preview_url
+                
+                # Refresh Deezer preview URLs (they expire)
+                if song.provider == 'deezer' and song.id:
+                    fresh_url = refresh_deezer_preview_url(song.id)
+                    if fresh_url:
+                        preview_url = fresh_url
+                
+                converted_songs.append({
                     'id': song.id,
                     'name': song.name,
                     'artists': [{'name': song.artist}],
                     'album': {'name': song.album or 'Unknown Album', 'release_date': 'Unknown'},
-                    'preview_url': song.preview_url,
+                    'preview_url': preview_url,
                     'provider': song.provider
-                }
-                for song in songs
-            ]
+                })
             
+            songs = converted_songs
             random.shuffle(songs)
             num_rounds = min(request.num_rounds, len(songs))
             
@@ -223,11 +255,13 @@ async def submit_guess(request: GuessRequest):
             raise HTTPException(status_code=400, detail="Game already completed")
         
         current_song = session.songs[session.current_round]
-        correct_title = current_song['name']
-        artists = ", ".join([a['name'] for a in current_song['artists']])
+        song_title = current_song['name']
+        # Get artist name(s) - primary artist for validation
+        primary_artist = current_song['artists'][0]['name'] if current_song['artists'] else 'Unknown Artist'
+        all_artists = ", ".join([a['name'] for a in current_song['artists']])
         
-        # Validate guess
-        is_correct = session.game_engine._validate_guess(request.guess, correct_title)
+        # Validate guess against artist name (not song title)
+        is_correct = session.game_engine._validate_guess(request.guess, primary_artist)
         
         points_earned = 0.0
         artist_hint = None
@@ -249,7 +283,7 @@ async def submit_guess(request: GuessRequest):
                 session.first_guess_made = False
             else:
                 # Incorrect, give hint for second guess
-                artist_hint = artists
+                artist_hint = song_title  # Hint with the song title
                 points_earned = 0.0
         else:
             # Second guess
@@ -271,8 +305,8 @@ async def submit_guess(request: GuessRequest):
         return GuessResponse(
             correct=is_correct,
             points_earned=points_earned,
-            correct_answer=correct_title if is_final_guess and not is_correct else None,
-            artist_hint=artist_hint,
+            correct_answer=all_artists if is_final_guess and not is_correct else None,
+            artist_hint=song_title,  # Now we hint with the song title instead
             total_score=session.game_engine.score,
             is_final_guess=is_final_guess
         )

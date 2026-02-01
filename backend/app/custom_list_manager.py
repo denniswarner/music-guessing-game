@@ -66,7 +66,10 @@ class CustomListManager:
         target_audience: Optional[str] = None,
         primary_decade: Optional[str] = None,
         primary_genre: Optional[str] = None,
-        created_by: str = "admin"
+        created_by: str = "admin",
+        status: str = "approved",
+        submitted_by: Optional[str] = None,
+        songs: Optional[List] = None
     ) -> CustomSongList:
         """
         Create a new custom song list.
@@ -78,6 +81,9 @@ class CustomListManager:
             primary_decade: Primary decade focus
             primary_genre: Primary genre focus
             created_by: Creator username
+            status: List status (pending, approved, rejected)
+            submitted_by: Name/email of guest contributor
+            songs: Initial list of songs (for guest submissions)
             
         Returns:
             CustomSongList: The created list
@@ -92,15 +98,46 @@ class CustomListManager:
             target_audience=target_audience,
             primary_decade=primary_decade,
             primary_genre=primary_genre,
-            songs=[],
+            songs=songs or [],
             created_at=now,
             updated_at=now,
             created_by=created_by,
-            is_active=True,
+            is_active=(status == "approved"),
+            status=status,
+            submitted_by=submitted_by,
             times_played=0
         )
         
         # Save to file
+        list_path = self._get_list_path(list_id)
+        list_path.write_text(json.dumps(custom_list.dict(), indent=2))
+        
+        # Update index
+        summary = self._list_to_summary(custom_list)
+        self._update_index(summary)
+        
+        return custom_list
+    
+    def update_status(self, list_id: str, status: str) -> Optional[CustomSongList]:
+        """
+        Update the status of a list (for approving/rejecting submissions).
+        
+        Args:
+            list_id: List ID
+            status: New status (pending, approved, rejected)
+            
+        Returns:
+            Updated CustomSongList or None if not found
+        """
+        custom_list = self.get_list(list_id)
+        if not custom_list:
+            return None
+        
+        custom_list.status = status
+        custom_list.is_active = (status == "approved")
+        custom_list.updated_at = datetime.utcnow().isoformat()
+        
+        # Save
         list_path = self._get_list_path(list_id)
         list_path.write_text(json.dumps(custom_list.dict(), indent=2))
         
@@ -361,7 +398,9 @@ class CustomListManager:
             created_at=custom_list.created_at,
             updated_at=custom_list.updated_at,
             times_played=custom_list.times_played,
-            is_active=custom_list.is_active
+            is_active=custom_list.is_active,
+            status=getattr(custom_list, 'status', 'approved'),
+            submitted_by=getattr(custom_list, 'submitted_by', None)
         )
 
 

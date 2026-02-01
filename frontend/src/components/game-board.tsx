@@ -17,12 +17,13 @@ interface GameBoardProps {
   onRestart: () => void;
 }
 
-type GameState = 'playing-audio' | 'guessing' | 'showing-result' | 'game-over';
+type GameState = 'playing-audio' | 'guessing' | 'showing-result' | 'between-rounds' | 'game-over';
 
 interface RoundResult {
   correct: boolean;
   userGuess: string;
   correctAnswer: string;
+  songTitle: string;
   points: number;
 }
 
@@ -35,6 +36,7 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
   const [hasGuessed, setHasGuessed] = useState(false);
   const [roundResults, setRoundResults] = useState<RoundResult[]>([]);
   const [currentResult, setCurrentResult] = useState<RoundResult | null>(null);
+  const [betweenRoundsCount, setBetweenRoundsCount] = useState(3);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const currentSong = session.songs[currentRound];
@@ -68,6 +70,26 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
     }
   }, [gameState, guessTimeLeft, hasGuessed]);
 
+  // Between-rounds countdown
+  useEffect(() => {
+    if (gameState === 'between-rounds') {
+      if (betweenRoundsCount > 0) {
+        const timer = setTimeout(() => {
+          setBetweenRoundsCount(betweenRoundsCount - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        // Countdown finished, start playing audio
+        setGameState('playing-audio');
+      }
+    }
+  }, [gameState, betweenRoundsCount]);
+
+  // Get artist name from current song
+  const getArtistName = () => {
+    return currentSong.artists?.[0]?.name || 'Unknown Artist';
+  };
+
   const handleTimeUp = async () => {
     if (hasGuessed) return;
     
@@ -76,7 +98,8 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
     const result: RoundResult = {
       correct: false,
       userGuess: '(No answer)',
-      correctAnswer: currentSong.name,
+      correctAnswer: getArtistName(),
+      songTitle: currentSong.name,
       points: 0
     };
     
@@ -106,7 +129,8 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
       const result: RoundResult = {
         correct: response.correct,
         userGuess: guess.trim(),
-        correctAnswer: currentSong.name,
+        correctAnswer: getArtistName(),
+        songTitle: currentSong.name,
         points: points
       };
 
@@ -134,12 +158,13 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
       // Game over
       setGameState('game-over');
     } else {
-      // Next round
+      // Show between-rounds countdown
       setCurrentRound(currentRound + 1);
       setGuess('');
       setCurrentResult(null);
       setHasGuessed(false);
-      setGameState('playing-audio');
+      setBetweenRoundsCount(3);
+      setGameState('between-rounds');
       setGuessTimeLeft(10);
     }
   };
@@ -203,13 +228,14 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
                             <X className="h-5 w-5 text-red-600" />
                           )}
                         </div>
-                        <div className="text-sm">
+                        <div className="text-sm space-y-1">
                           <div>Your answer: <span className="font-medium">{result.userGuess}</span></div>
-                          {!result.correct && (
-                            <div className="text-muted-foreground">
-                              Correct answer: <span className="font-medium">{result.correctAnswer}</span>
-                            </div>
-                          )}
+                          <div className="text-muted-foreground">
+                            Artist: <span className="font-medium">{result.correctAnswer}</span>
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Song: "{result.songTitle}"
+                          </div>
                         </div>
                       </div>
                       {result.correct && (
@@ -253,9 +279,40 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
           </CardHeader>
         </Card>
 
+        {/* Between Rounds Countdown */}
+        {gameState === 'between-rounds' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600"
+          >
+            <div className="text-center">
+              <motion.div
+                key={betweenRoundsCount}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 1.5, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-9xl font-bold text-white drop-shadow-2xl">
+                  {betweenRoundsCount}
+                </div>
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-6 text-xl text-white/80"
+              >
+                Next song coming up...
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+
         {/* Audio Player - Only shows during playing-audio state */}
         {gameState === 'playing-audio' && (
           <AudioPlayer
+            key={`audio-${currentRound}-${currentSong.id}`}
             previewUrl={currentSong.preview_url || ''}
             duration={10}
             autoPlay={true}
@@ -296,7 +353,7 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
                   >
                     <Input
                       type="text"
-                      placeholder="Enter song title..."
+                      placeholder="Enter artist name..."
                       value={guess}
                       onChange={(e) => setGuess(e.target.value)}
                       disabled={hasGuessed}
@@ -347,10 +404,13 @@ export function GameBoard({ session, onRestart }: GameBoardProps) {
                       {currentResult.userGuess === '(No answer)' ? "Time's Up!" : 'Nope!'}
                     </div>
                     <div className="text-xl text-red-700 dark:text-red-300 mb-2">
-                      The answer was:
+                      The artist was:
                     </div>
-                    <div className="text-2xl font-semibold text-red-900 dark:text-red-100">
+                    <div className="text-2xl font-semibold text-red-900 dark:text-red-100 mb-2">
                       {currentResult.correctAnswer}
+                    </div>
+                    <div className="text-sm text-red-700 dark:text-red-300">
+                      Song: "{currentResult.songTitle}"
                     </div>
                   </CardContent>
                 </Card>

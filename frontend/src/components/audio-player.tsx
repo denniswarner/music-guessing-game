@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Play, Pause, Volume2, VolumeX, Music } from 'lucide-react';
+import { Music, Volume2 } from 'lucide-react';
 
 interface AudioPlayerProps {
   previewUrl: string;
@@ -22,10 +21,13 @@ export function AudioPlayer({
   demoMode = false
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const hasStartedRef = useRef(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [hasEnded, setHasEnded] = useState(false);
+
+  // Reset hasStarted when previewUrl changes
+  useEffect(() => {
+    hasStartedRef.current = false;
+  }, [previewUrl]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -37,119 +39,88 @@ export function AudioPlayer({
       // Stop at specified duration (default 10s)
       if (audio.currentTime >= duration) {
         audio.pause();
-        setIsPlaying(false);
-        setHasEnded(true);
         if (onEnded) onEnded();
       }
     };
 
     const handleEnded = () => {
-      setIsPlaying(false);
-      setHasEnded(true);
       if (onEnded) onEnded();
+    };
+
+    const startPlayback = () => {
+      // Only start once per song
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
+      
+      audio.play()
+        .catch((err) => {
+          console.error('AutoPlay failed:', err);
+          hasStartedRef.current = false; // Allow retry
+        });
+    };
+
+    const handleCanPlay = () => {
+      if (autoPlay) {
+        startPlayback();
+      }
+    };
+
+    const handleError = () => {
+      // Silently handle audio load errors (e.g., no valid source)
+      console.log('Audio load error - preview may not be available');
     };
 
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('canplaythrough', handleCanPlay);
+    audio.addEventListener('error', handleError);
 
-    if (autoPlay) {
-      audio.play().catch(console.error);
-      setIsPlaying(true);
+    // Try to play immediately if audio is already loaded
+    if (autoPlay && audio.readyState >= 3) {
+      startPlayback();
     }
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('canplaythrough', handleCanPlay);
+      audio.removeEventListener('error', handleError);
     };
   }, [previewUrl, duration, autoPlay, onEnded]);
 
-  const togglePlay = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (hasEnded) {
-      audio.currentTime = 0;
-      setHasEnded(false);
-    }
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-      } catch (error) {
-        console.error('Error playing audio:', error);
-      }
-    }
-  };
-
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    
-    audio.muted = !audio.muted;
-    setIsMuted(!isMuted);
-  };
-
   const progressPercentage = (currentTime / duration) * 100;
   const isDemoUrl = previewUrl?.includes('mock');
+  const hasValidUrl = previewUrl && previewUrl.length > 0 && !isDemoUrl;
 
   return (
     <Card className="p-6">
-      {demoMode && isDemoUrl && (
+      {(demoMode || !hasValidUrl) && (
         <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg text-sm">
           <p className="font-semibold text-yellow-900 dark:text-yellow-100">
-            🎵 Demo Mode
+            🎵 {demoMode ? 'Demo Mode' : 'Audio Unavailable'}
           </p>
           <p className="text-yellow-700 dark:text-yellow-300">
-            Audio playback not available in demo mode. Use your music knowledge to guess the song!
+            {demoMode 
+              ? 'Audio playback not available in demo mode. Use your music knowledge to guess the song!'
+              : 'No audio preview available for this song.'}
           </p>
         </div>
       )}
-      <audio ref={audioRef} src={!isDemoUrl ? previewUrl : undefined} preload="auto" />
+      <audio ref={audioRef} src={hasValidUrl ? previewUrl : undefined} preload="auto" />
       
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            {Math.floor(currentTime)}s / {duration}s
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleMute}
-            aria-label={isMuted ? "Unmute" : "Mute"}
-          >
-            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-          </Button>
+        {/* Now Playing indicator */}
+        <div className="flex items-center justify-center gap-3 py-2">
+          <Volume2 className="h-5 w-5 text-primary animate-pulse" />
+          <span className="text-lg font-medium">Now Playing...</span>
+        </div>
+        
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>{Math.floor(currentTime)}s</span>
+          <span>{duration}s</span>
         </div>
 
-        <Progress value={progressPercentage} className="w-full" />
-
-        <Button
-          onClick={togglePlay}
-          className="w-full"
-          size="lg"
-          disabled={!previewUrl || isDemoUrl}
-        >
-          {isDemoUrl ? (
-            <>
-              <Music className="mr-2 h-5 w-5" />
-              Audio Not Available (Demo Mode)
-            </>
-          ) : isPlaying ? (
-            <>
-              <Pause className="mr-2 h-5 w-5" />
-              Pause
-            </>
-          ) : (
-            <>
-              <Play className="mr-2 h-5 w-5" />
-              {hasEnded ? 'Play Again' : 'Play 10s Preview'}
-            </>
-          )}
-        </Button>
+        <Progress value={progressPercentage} className="w-full h-3" />
       </div>
     </Card>
   );

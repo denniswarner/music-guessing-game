@@ -9,10 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Music, Users, Calendar, TrendingUp, Edit, Trash2, Play, Database, Settings, Link, ListMusic } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getAllLists, getLibraryStats } from '@/lib/admin-api';
+import { getAllLists, getLibraryStats, updateListStatus } from '@/lib/admin-api';
 import type { CustomListSummary } from '@/lib/admin-types';
 import type { MusicProvider } from '@/lib/types';
 import { toast } from 'sonner';
+import { CheckCircle, XCircle, Clock, Share2 } from 'lucide-react';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -30,11 +31,36 @@ export default function AdminPage() {
   const [selectedListId, setSelectedListId] = useState<string>('');
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [playlistRounds, setPlaylistRounds] = useState('10');
+  
+  // Active playlist state (what users see on the game page)
+  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
+  const [activePlaylistName, setActivePlaylistName] = useState<string | null>(null);
 
   useEffect(() => {
     loadLists();
     loadProviderSettings();
+    loadActivePlaylist();
   }, []);
+  
+  const loadActivePlaylist = () => {
+    const id = localStorage.getItem('activePlaylistId');
+    const name = localStorage.getItem('activePlaylistName');
+    if (id && name) {
+      setActivePlaylistId(id);
+      setActivePlaylistName(name);
+    }
+  };
+  
+  const clearActivePlaylist = () => {
+    localStorage.removeItem('activePlaylistId');
+    localStorage.removeItem('activePlaylistName');
+    localStorage.removeItem('activePlaylistRounds');
+    setActivePlaylistId(null);
+    setActivePlaylistName(null);
+    toast.success('Switched to normal game mode', {
+      description: 'Users will now see the search interface.'
+    });
+  };
 
   const loadLists = async () => {
     try {
@@ -97,6 +123,20 @@ export default function AdminPage() {
           <div className="flex gap-3">
             <Button
               variant="outline"
+              onClick={() => {
+                const url = `${window.location.origin}/contribute`;
+                navigator.clipboard.writeText(url);
+                toast.success('Contribute link copied!', {
+                  description: 'Share this link with others to let them submit playlists.'
+                });
+              }}
+              className="gap-2"
+            >
+              <Share2 className="h-4 w-4" />
+              Share Link
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => router.push('/admin/library')}
               className="gap-2"
             >
@@ -118,6 +158,55 @@ export default function AdminPage() {
             </Button>
           </div>
         </div>
+
+        {/* Current Game Mode Indicator */}
+        <Card className={`mb-6 ${activePlaylistId ? 'border-purple-300 bg-purple-50 dark:bg-purple-950/20' : 'border-green-300 bg-green-50 dark:bg-green-950/20'}`}>
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {activePlaylistId ? (
+                  <>
+                    <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-full">
+                      <ListMusic className="h-5 w-5 text-purple-700 dark:text-purple-300" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-purple-900 dark:text-purple-100">
+                        Active Playlist: <span className="font-bold">{activePlaylistName}</span>
+                      </p>
+                      <p className="text-xs text-purple-700 dark:text-purple-300">
+                        Users will play songs from this playlist
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-2 bg-green-200 dark:bg-green-800 rounded-full">
+                      <Music className="h-5 w-5 text-green-700 dark:text-green-300" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                        Normal Game Mode
+                      </p>
+                      <p className="text-xs text-green-700 dark:text-green-300">
+                        Users can search for any artist, genre, or era
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+              {activePlaylistId && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearActivePlaylist}
+                  className="text-purple-700 border-purple-300 hover:bg-purple-100"
+                >
+                  Switch to Normal Mode
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Provider Settings Card - Always Visible */}
         <Card className="mb-8">
@@ -371,19 +460,21 @@ export default function AdminPage() {
                     toast.error('Please select a playlist');
                     return;
                   }
-                  // Store custom list game settings
-                  localStorage.setItem('gameMode', 'customList');
-                  localStorage.setItem('gameListId', selectedListId);
-                  localStorage.setItem('gameListName', selectedList.name);
-                  localStorage.setItem('gameRounds', playlistRounds || '10');
-                  toast.success(`Starting game with "${selectedList.name}"!`);
+                  // Set persistent active playlist (stays until admin changes it)
+                  localStorage.setItem('activePlaylistId', selectedListId);
+                  localStorage.setItem('activePlaylistName', selectedList.name);
+                  localStorage.setItem('activePlaylistRounds', playlistRounds || '10');
+                  toast.success(`"${selectedList.name}" is now the active playlist!`);
                   router.push('/');
                 } else {
                   if (!playlistUrl) {
                     toast.error('Please enter a playlist URL');
                     return;
                   }
-                  // Store external playlist settings
+                  // Clear any active playlist and use external playlist (one-time)
+                  localStorage.removeItem('activePlaylistId');
+                  localStorage.removeItem('activePlaylistName');
+                  localStorage.removeItem('activePlaylistRounds');
                   localStorage.setItem('gameMode', 'playlist');
                   localStorage.setItem('gameQuery', playlistUrl);
                   localStorage.setItem('gameRounds', playlistRounds || '10');
@@ -399,7 +490,7 @@ export default function AdminPage() {
         </Card>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">Total Lists</CardTitle>
@@ -415,6 +506,19 @@ export default function AdminPage() {
             <CardContent>
               <div className="text-2xl font-bold">
                 {lists.filter(l => l.is_active).length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={lists.filter(l => l.status === 'pending').length > 0 ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950' : ''}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Pending Review
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                {lists.filter(l => l.status === 'pending').length}
               </div>
             </CardContent>
           </Card>
@@ -472,7 +576,12 @@ export default function AdminPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {lists.map((list) => (
-              <Card key={list.id} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={list.id} 
+                className={`hover:shadow-lg transition-shadow ${
+                  list.status === 'pending' ? 'border-yellow-500 border-2' : ''
+                }`}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -483,10 +592,29 @@ export default function AdminPage() {
                         </CardDescription>
                       )}
                     </div>
-                    {!list.is_active && (
-                      <Badge variant="secondary">Inactive</Badge>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      {list.status === 'pending' && (
+                        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-500">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Pending
+                        </Badge>
+                      )}
+                      {list.status === 'rejected' && (
+                        <Badge variant="outline" className="bg-red-100 text-red-800 border-red-500">
+                          Rejected
+                        </Badge>
+                      )}
+                      {!list.is_active && list.status !== 'pending' && list.status !== 'rejected' && (
+                        <Badge variant="secondary">Inactive</Badge>
+                      )}
+                    </div>
                   </div>
+                  {/* Submitted by info */}
+                  {list.submitted_by && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Submitted by: <span className="font-medium">{list.submitted_by}</span>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -526,7 +654,47 @@ export default function AdminPage() {
                       Updated {formatDate(list.updated_at)}
                     </div>
 
-                    {/* Actions */}
+                    {/* Approval Actions for Pending Lists */}
+                    {list.status === 'pending' && (
+                      <div className="flex gap-2 pt-2 border-t">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="flex-1 gap-1 bg-green-600 hover:bg-green-700"
+                          onClick={async () => {
+                            try {
+                              await updateListStatus(list.id, 'approved');
+                              toast.success(`"${list.name}" has been approved!`);
+                              loadLists();
+                            } catch (err) {
+                              toast.error('Failed to approve playlist');
+                            }
+                          }}
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 gap-1 text-red-600 border-red-300 hover:bg-red-50"
+                          onClick={async () => {
+                            try {
+                              await updateListStatus(list.id, 'rejected');
+                              toast.success(`"${list.name}" has been rejected`);
+                              loadLists();
+                            } catch (err) {
+                              toast.error('Failed to reject playlist');
+                            }
+                          }}
+                        >
+                          <XCircle className="h-3 w-3" />
+                          Reject
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Normal Actions */}
                     <div className="flex gap-2 pt-2">
                       <Button
                         size="sm"
@@ -541,13 +709,13 @@ export default function AdminPage() {
                         size="sm"
                         variant="outline"
                         className="gap-2"
+                        disabled={list.status === 'pending'}
                         onClick={() => {
-                          // Start game with this custom list
-                          localStorage.setItem('gameMode', 'customList');
-                          localStorage.setItem('gameListId', list.id);
-                          localStorage.setItem('gameListName', list.name);
-                          localStorage.setItem('gameRounds', Math.min(list.song_count, 10).toString());
-                          toast.success(`Starting game with "${list.name}"!`);
+                          // Set this as the active playlist (persists until changed)
+                          localStorage.setItem('activePlaylistId', list.id);
+                          localStorage.setItem('activePlaylistName', list.name);
+                          localStorage.setItem('activePlaylistRounds', Math.min(list.song_count, 10).toString());
+                          toast.success(`"${list.name}" is now the active playlist!`);
                           router.push('/');
                         }}
                       >

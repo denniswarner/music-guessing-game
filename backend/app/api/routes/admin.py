@@ -11,7 +11,8 @@ import random
 from app.custom_lists_models import (
     CustomSongList, CustomSong, CustomListSummary,
     CreateCustomListRequest, AddSongToListRequest,
-    SearchSongRequest, FilterCustomListRequest
+    SearchSongRequest, FilterCustomListRequest,
+    GuestSubmissionRequest
 )
 from app.custom_list_manager import custom_list_manager
 from app.metadata_library import metadata_library
@@ -461,3 +462,63 @@ async def enrich_song_metadata(
             },
             "error": str(e)
         }
+
+
+# ============================================================================
+# Guest Submission Endpoints
+# ============================================================================
+
+@router.post("/submit-playlist", response_model=CustomSongList)
+async def submit_guest_playlist(request: GuestSubmissionRequest):
+    """
+    Submit a playlist from a guest contributor.
+    
+    Playlists submitted by guests are marked as 'pending' and require
+    admin approval before becoming active.
+    
+    Args:
+        request: Guest submission with name, description, contributor info, and songs
+        
+    Returns:
+        The created custom list (with pending status)
+    """
+    try:
+        if len(request.songs) == 0:
+            raise HTTPException(status_code=400, detail="Playlist must contain at least one song")
+        
+        custom_list = custom_list_manager.create_list(
+            name=request.name,
+            description=request.description,
+            created_by="guest",
+            status="pending",
+            submitted_by=request.submitted_by,
+            songs=request.songs
+        )
+        return custom_list
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to submit playlist: {str(e)}")
+
+
+@router.put("/lists/{list_id}/status", response_model=CustomSongList)
+async def update_list_status(list_id: str, status: str):
+    """
+    Update the status of a playlist (for admin approval workflow).
+    
+    Args:
+        list_id: List ID
+        status: New status (pending, approved, rejected)
+        
+    Returns:
+        Updated custom list
+    """
+    if status not in ["pending", "approved", "rejected"]:
+        raise HTTPException(status_code=400, detail="Status must be 'pending', 'approved', or 'rejected'")
+    
+    custom_list = custom_list_manager.update_status(list_id, status)
+    
+    if not custom_list:
+        raise HTTPException(status_code=404, detail="Custom list not found")
+    
+    return custom_list

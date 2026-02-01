@@ -39,33 +39,33 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
     if (savedClientId) setClientId(savedClientId);
     if (savedClientSecret) setClientSecret(savedClientSecret);
 
-    // Check if admin set up a game (playlist or custom list)
-    const gameMode = localStorage.getItem('gameMode');
-    const gameQuery = localStorage.getItem('gameQuery');
-    const gameRounds = localStorage.getItem('gameRounds');
-    const gameListId = localStorage.getItem('gameListId');
-    const gameListName = localStorage.getItem('gameListName');
+    // Check for persistent active playlist (set by admin, persists until changed)
+    const activeListId = localStorage.getItem('activePlaylistId');
+    const activeListName = localStorage.getItem('activePlaylistName');
+    const activeRounds = localStorage.getItem('activePlaylistRounds');
     
-    if (gameMode === 'playlist' && gameQuery) {
-      // External playlist mode
-      setMode('playlist');
-      setQuery(gameQuery);
-      if (gameRounds) setRounds(parseInt(gameRounds));
-      // Clear the stored settings after loading
-      localStorage.removeItem('gameMode');
-      localStorage.removeItem('gameQuery');
-      localStorage.removeItem('gameRounds');
-    } else if (gameMode === 'customList' && gameListId) {
-      // Custom list mode
+    if (activeListId && activeListName) {
+      // Admin has set an active playlist - use it
       setMode('custom');
-      setCustomListId(gameListId);
-      setCustomListName(gameListName);
-      if (gameRounds) setRounds(parseInt(gameRounds));
-      // Clear the stored settings after loading
-      localStorage.removeItem('gameMode');
-      localStorage.removeItem('gameListId');
-      localStorage.removeItem('gameListName');
-      localStorage.removeItem('gameRounds');
+      setCustomListId(activeListId);
+      setCustomListName(activeListName);
+      if (activeRounds) setRounds(parseInt(activeRounds));
+    } else {
+      // Check for one-time game triggers (e.g., external playlist)
+      const gameMode = localStorage.getItem('gameMode');
+      const gameQuery = localStorage.getItem('gameQuery');
+      const gameRounds = localStorage.getItem('gameRounds');
+      
+      if (gameMode === 'playlist' && gameQuery) {
+        // External playlist mode (one-time)
+        setMode('playlist');
+        setQuery(gameQuery);
+        if (gameRounds) setRounds(parseInt(gameRounds));
+        // Clear one-time triggers
+        localStorage.removeItem('gameMode');
+        localStorage.removeItem('gameQuery');
+        localStorage.removeItem('gameRounds');
+      }
     }
   }, []);
 
@@ -78,14 +78,6 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
     };
     
     onStart(provider, credentials, mode, query, rounds, demoMode, customListId || undefined);
-  };
-
-  const modeDescriptions: Record<GameMode, string> = {
-    genre: demoMode ? 'Try: rock, pop, 80s, 70s, 60s' : 'Search by genre or era (e.g., "rock", "90s", "jazz")',
-    playlist: demoMode ? 'Not available in demo mode' : provider === 'deezer' ? 'Use any public Deezer playlist URL or ID' : 'Use any public Spotify playlist URL',
-    artist: demoMode ? 'Try: Beatles, Queen, Michael Jackson, Nirvana' : 'Play songs from a specific artist',
-    demo: 'Demo mode with classic songs',
-    custom: 'Play songs from your custom playlist',
   };
 
   return (
@@ -116,32 +108,6 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Music Provider Selection - HIDDEN - Always uses Demo */}
-            {/* Provider selection moved to Admin Dashboard */}
-            
-            {/* Game Mode Selection - Only show if not playlist mode from admin and not custom list */}
-            {mode !== 'playlist' && !customListId && (
-              <div className="space-y-3">
-                <Label>Game Mode</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['genre', 'artist'] as GameMode[]).map((m) => (
-                    <Button
-                      key={m}
-                      type="button"
-                      variant={mode === m ? 'default' : 'outline'}
-                      onClick={() => setMode(m)}
-                      className="capitalize"
-                    >
-                      {m}
-                    </Button>
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {modeDescriptions[mode]}
-                </p>
-              </div>
-            )}
-
             {/* Show playlist info if in playlist mode from admin */}
             {mode === 'playlist' && (
               <div className="p-4 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
@@ -163,27 +129,20 @@ export function GameSetup({ onStart, isLoading = false }: GameSetupProps) {
               </div>
             )}
 
-            {/* Query Input - Hide when using custom list */}
-            {!customListId && (
+            {/* Search Input - Only show in normal game mode (no custom list or playlist) */}
+            {!customListId && mode !== 'playlist' && (
               <div className="space-y-2">
-                <Label htmlFor="query">
-                  {mode === 'genre' && (demoMode ? 'Genre or Era (Optional)' : 'Genre or Era')}
-                  {mode === 'playlist' && 'Playlist URL'}
-                  {mode === 'artist' && (demoMode ? 'Artist Name (Optional)' : 'Artist Name')}
-                </Label>
+                <Label htmlFor="query">Search Songs</Label>
                 <Input
                   id="query"
                   type="text"
-                  placeholder={
-                    mode === 'genre' ? (demoMode ? 'e.g., rock, pop, 80s (or leave blank for all)' : 'e.g., rock, 90s, jazz') :
-                    mode === 'playlist' ? 'Playlist URL from admin' :
-                    demoMode ? 'e.g., Beatles, Queen (or leave blank for all)' : 'e.g., The Beatles, Taylor Swift'
-                  }
+                  placeholder="Search by artist, genre, or era (e.g., Queen, 80s rock, jazz)"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  required={!demoMode && mode !== 'genre'}
-                  disabled={mode === 'playlist'}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Try: "Beatles", "90s", "hip hop", "Michael Jackson", etc.
+                </p>
               </div>
             )}
 
